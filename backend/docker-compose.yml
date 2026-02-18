@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  tekkscope-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Point to external tekkscope-search-engine service
+      # For local development, ensure tekkscope-search-engine is running separately
+      - SEARXNG_URL=http://localhost:8000
+      - REDIS_URL=redis://redis:6379/0
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
