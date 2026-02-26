@@ -1,0 +1,87 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/**"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - ".github/**"
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_BACKEND_DOMAIN: ${{ secrets.NEXT_PUBLIC_BACKEND_DOMAIN }}
+
+  container-and-deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build and push image
+        run: |
+          az acr build \
+            --registry tekkscopeacr1aa77 \
+            --image tekkscope-app:${{ github.sha }} \
+            --file frontend/Dockerfile \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            --build-arg NEXT_PUBLIC_BACKEND_DOMAIN="${{ secrets.NEXT_PUBLIC_BACKEND_DOMAIN }}" \
+            frontend
+
+      - name: Deploy image to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: tekkscope-app
+          images: tekkscopeacr1aa77.azurecr.io/tekkscope-app:${{ github.sha }}
+          app-settings-json: |
+            [
+              { "name": "NEXT_PUBLIC_SUPABASE_URL", "value": "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}", "slotSetting": false },
+              { "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY", "value": "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}", "slotSetting": false },
+              { "name": "NEXT_PUBLIC_BACKEND_DOMAIN", "value": "${{ secrets.NEXT_PUBLIC_BACKEND_DOMAIN }}", "slotSetting": false },
+              { "name": "SUPABASE_SERVICE_ROLE_KEY", "value": "${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}", "slotSetting": false },
+              { "name": "TEKK_API_KEY_PEPPER", "value": "${{ secrets.TEKK_API_KEY_PEPPER }}", "slotSetting": false },
+              { "name": "NODE_ENV", "value": "production", "slotSetting": false }
+            ]

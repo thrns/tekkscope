@@ -1,0 +1,53 @@
+name: Backend CD
+
+on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up kubelogin
+        uses: azure/use-kubelogin@v1
+        with:
+          kubelogin-version: "v0.0.25"
+
+      - name: Get AKS credentials
+        uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+          admin: "false"
+          use-kubelogin: "true"
+
+      - name: Ensure image pull secret exists
+        run: |
+          kubectl create secret docker-registry dockerhub-secret \
+            --dry-run=client -o yaml \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username="${{ secrets.DOCKER_USERNAME }}" \
+            --docker-password="${{ secrets.DOCKER_PASSWORD }}" \
+            --docker-email="${{ secrets.DOCKER_EMAIL }}" | kubectl apply -f -
+
+      - name: Apply backend resources
+        run: |
+          kubectl apply -f backend/kubernetes/deployment.yaml
+          kubectl apply -f backend/kubernetes/service.yaml
+          kubectl apply -f backend/kubernetes/redis.yaml
+          kubectl set image deployment/tekkscope-backend \
+            tekkscope-backend=tekkscope/tekkscope-backend:${{ github.event.workflow_run.head_sha }}
+          kubectl rollout status deployment/tekkscope-backend --timeout=180s
