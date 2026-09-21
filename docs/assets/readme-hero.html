@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tekkscope — repository overview</title>
+    <style>
+      :root {
+        --ink: #eef6f4;
+        --muted: #9fb4b3;
+        --bg: #101819;
+        --panel: #172426;
+        --panel-strong: #223134;
+        --line: rgba(152, 202, 204, 0.2);
+        --teal: #46959f;
+        --teal-soft: #8ed2d0;
+        --amber: #d68923;
+        --yellow: #f7d667;
+        --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --display: Georgia, "Times New Roman", serif;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        width: 1600px;
+        height: 900px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      body {
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .poster {
+        position: relative;
+        width: 1600px;
+        height: 900px;
+        overflow: hidden;
+        padding: 54px 68px 50px;
+        background:
+          radial-gradient(circle at 78% 16%, rgba(70, 149, 159, 0.17), transparent 28%),
+          radial-gradient(circle at 8% 100%, rgba(214, 137, 35, 0.08), transparent 26%),
+          var(--bg);
+      }
+
+      .poster::before {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        opacity: 0.18;
+        background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: linear-gradient(to bottom, black, transparent 88%);
+      }
+
+      .topline,
+      .footerline {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .topline { color: var(--muted); }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        color: var(--ink);
+        font-size: 20px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        color: var(--teal-soft);
+      }
+
+      .eyebrow,
+      .stamp,
+      .chip,
+      .node-kicker,
+      .path-label,
+      .footerline {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+
+      .eyebrow,
+      .stamp { font-size: 12px; }
+
+      .stamp {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .stamp::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--amber);
+        box-shadow: 0 0 0 5px rgba(214, 137, 35, 0.12);
+        content: "";
+      }
+
+      .hero {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 0.84fr 1.16fr;
+        gap: 72px;
+        align-items: center;
+        height: 680px;
+        padding: 72px 0 46px;
+      }
+
+      .copy { max-width: 610px; }
+
+      .copy .eyebrow {
+        margin: 0 0 24px;
+        color: var(--teal-soft);
+      }
+
+      h1 {
+        max-width: 610px;
+        margin: 0;
+        color: var(--ink);
+        font-family: var(--display);
+        font-size: 84px;
+        font-weight: 500;
+        line-height: 0.98;
+        letter-spacing: -0.06em;
+        text-wrap: balance;
+      }
+
+      .lede {
+        max-width: 520px;
+        margin: 30px 0 0;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.5;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 38px;
+      }
+
+      .chip {
+        padding: 9px 12px;
+        border: 1px solid rgba(142, 210, 208, 0.28);
+        border-radius: 999px;
+        color: var(--teal-soft);
+        font-size: 10px;
+        background: rgba(34, 49, 52, 0.52);
+      }
+
+      .system {
+        position: relative;
+        min-height: 520px;
+        padding: 26px;
+        border: 1px solid rgba(142, 210, 208, 0.23);
+        border-radius: 24px;
+        background: rgba(23, 36, 38, 0.72);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255,255,255,0.05);
+      }
+
+      .system::before,
+      .system::after {
+        position: absolute;
+        border: 1px solid rgba(70, 149, 159, 0.18);
+        border-radius: 50%;
+        content: "";
+        pointer-events: none;
+      }
+
+      .system::before { inset: 48px 70px 72px 90px; transform: rotate(-13deg); }
+      .system::after { inset: 98px 20px 30px 146px; transform: rotate(19deg); }
+
+      .system-head {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 21px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .system-head strong { font-size: 14px; font-weight: 600; }
+      .system-head span { color: var(--muted); font: 11px var(--mono); }
+
+      .map {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 0.62fr 1.14fr 0.92fr;
+        gap: 18px;
+        align-items: center;
+        min-height: 390px;
+        padding-top: 28px;
+      }
+
+      .lane {
+        display: grid;
+        gap: 18px;
+      }
+
+      .node {
+        position: relative;
+        display: grid;
+        gap: 7px;
+        padding: 16px;
+        border: 1px solid rgba(142, 210, 208, 0.2);
+        border-radius: 14px;
+        background: rgba(34, 49, 52, 0.84);
+      }
+
+      .node.primary {
+        min-height: 112px;
+        border-color: rgba(70, 149, 159, 0.58);
+        background: linear-gradient(145deg, rgba(70, 149, 159, 0.22), rgba(34,49,52,0.92));
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+      }
+
+      .node.output { background: rgba(16, 24, 25, 0.72); }
+
+      .node-kicker {
+        color: var(--amber);
+        font-size: 9px;
+      }
+
+      .node h2,
+      .node h3 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 650;
+        letter-spacing: -0.025em;
+      }
+
+      .node p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .input-node { border-color: rgba(246, 214, 103, 0.35); }
+      .input-node .node-kicker { color: var(--yellow); }
+
+      .core {
+        display: grid;
+        gap: 12px;
+        align-content: center;
+      }
+
+      .core .node { min-height: 92px; }
+
+      .core-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font: 10px var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .core-label::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--teal);
+        box-shadow: 0 0 0 5px rgba(70,149,159,0.12);
+        content: "";
+      }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .mini {
+        padding: 12px;
+        border: 1px solid rgba(142, 210, 208, 0.16);
+        border-radius: 11px;
+        background: rgba(16, 24, 25, 0.42);
+      }
+
+      .mini strong { display: block; font-size: 12px; }
+      .mini span { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+
+      .footerline {
+        position: absolute;
+        right: 68px;
+        bottom: 50px;
+        left: 68px;
+        z-index: 1;
+        color: rgba(159, 180, 179, 0.68);
+        font-size: 10px;
+      }
+
+      .footerline .right { color: rgba(142, 210, 208, 0.72); }
+    </style>
+  </head>
+  <body>
+    <main class="poster">
+      <header class="topline">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true">
+            <circle cx="21" cy="21" r="17" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.35" />
+            <path d="M7 16c8 7 20 7 28 0M6 20c9 7 21 7 30 0M6 24c9 7 21 7 30 0M8 28c8 6 18 6 26 0M11 12c6 5 14 5 20 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          <span>tekkscope</span>
+        </div>
+        <div class="stamp">source-backed research system</div>
+      </header>
+
+      <section class="hero">
+        <div class="copy">
+          <p class="eyebrow">repository / engineering overview</p>
+          <h1>Research as a composable API.</h1>
+          <p class="lede">Search the web, extract pages, run research workflows, stream progress, and export reports through one codebase.</p>
+          <div class="chips" aria-label="Core technologies">
+            <span class="chip">Next.js</span>
+            <span class="chip">FastAPI</span>
+            <span class="chip">SSE streams</span>
+            <span class="chip">MCP stdio</span>
+          </div>
+        </div>
+
+        <section class="system" aria-label="Tekkscope system map">
+          <div class="system-head">
+            <strong>request · research · delivery</strong>
+            <span>static map / v0.1.0</span>
+          </div>
+
+          <div class="map">
+            <div class="lane">
+              <div class="node input-node">
+                <span class="node-kicker">input</span>
+                <h2>Web app / API client</h2>
+                <p>Dashboard, docs, cURL, or MCP caller.</p>
+              </div>
+              <div class="node">
+                <span class="node-kicker">auth</span>
+                <h3>API key + session</h3>
+                <p>Bearer headers, query fallback, Supabase session.</p>
+              </div>
+            </div>
+
+            <div class="lane core">
+              <div class="core-label">FastAPI orchestration</div>
+              <div class="node primary">
+                <span class="node-kicker">research surface</span>
+                <h2>Search · Lens · DeepLens · ReportLens · Tek · NLTS</h2>
+                <p>Typed requests, LLM-backed workflows, structured responses, and Server-Sent Events.</p>
+              </div>
+              <div class="mini-grid">
+                <div class="mini"><strong>SearXNG</strong><span>search + dedupe</span></div>
+                <div class="mini"><strong>Crawlee</strong><span>Playwright extraction</span></div>
+                <div class="mini"><strong>LangChain</strong><span>provider routing</span></div>
+                <div class="mini"><strong>Redis</strong><span>optional cross-worker SSE</span></div>
+              </div>
+            </div>
+
+            <div class="lane">
+              <div class="node output">
+                <span class="node-kicker">delivery</span>
+                <h3>Streamed answer</h3>
+                <p>Thinking events, citations, response chunks, and end-of-stream markers.</p>
+              </div>
+              <div class="node output">
+                <span class="node-kicker">artifact</span>
+                <h3>Research report</h3>
+                <p>Markdown, PDF, DOCX, or a stored download.</p>
+              </div>
+              <div class="node output">
+                <span class="node-kicker">integration</span>
+                <h3>MCP tools</h3>
+                <p>Search, browse, extract, retrieve sources, generate, export.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </section>
+
+      <footer class="footerline">
+        <span>frontend/ · backend/ · backend/migrations/ · backend/kubernetes/</span>
+        <span class="right">static inspection / no runtime claims</span>
+      </footer>
+    </main>
+  </body>
+</html>
